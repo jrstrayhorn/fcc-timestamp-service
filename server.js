@@ -13,18 +13,15 @@ var moment = require('moment');
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
-app.post('/', function (req, res) {
-  res.json(createJSON(null, null))
-})
-
-app.post('/:time', function(req, res) {
+app.get('/:time', function(req, res) {
   var timeParam = req.params.time
-  var timeMoment = moment(timeParam)
-  
+  var timeMoment
+
   if (!isNaN(timeParam)) {
-    // need to convert to number
-    timeParam = Number(timeParam)
-    timeMoment = moment().unix(timeParam)
+    // since number need to parse via Unix time
+    timeMoment = moment(timeParam, 'X')
+  } else {
+    timeMoment = moment(timeParam, 'MMMM D, YYYY')
   }
   
   if (timeMoment.isValid) {
@@ -45,25 +42,6 @@ function createJSON(unix, natural) {
 app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
-
-
-
-app.get("/dreams", function (request, response) {
-  response.send(dreams);
-});
-
-// could also use the POST body instead of query string: http://expressjs.com/en/api.html#req.body
-app.post("/dreams", function (request, response) {
-  dreams.push(request.query.dream);
-  response.sendStatus(200);
-});
-
-// Simple in-memory store for now
-var dreams = [
-  "Find and count some sheep",
-  "Climb a really tall mountain",
-  "Wash the dishes"
-];
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT || '3939', function () {
